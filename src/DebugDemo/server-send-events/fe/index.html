@@ -8,18 +8,26 @@
   </head>
   <body>
     <button class="btn">请求接口</button>
-    <div id="result" style="word-wrap: break-word;"></div>
+    <div id="result" style="word-wrap: break-word"></div>
     <script type="module">
-    let resultEl = document.querySelector('#result')
-    // SSE https://developer.mozilla.org/zh-CN/docs/Web/API/Server-sent_events/Using_server-sent_events#%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8E%A5%E5%8F%97%E4%BA%8B%E4%BB%B6
-    // 前端 EventStream API 发起请求，后端 Koa，ctx.body 设置 stream 可写流，ctx.set 响应类型 text/event-stream。
-    document.querySelector(".btn").addEventListener("click", () => {
-        const evtSource = new EventSource("/open-ai/sendMsg");
+      let resultEl = document.querySelector('#result')
+      // SSE https://developer.mozilla.org/zh-CN/docs/Web/API/Server-sent_events/Using_server-sent_events#%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%8E%A5%E5%8F%97%E4%BA%8B%E4%BB%B6
+      // 前端 EventStream API 发起请求，后端 Koa，ctx.body 设置 stream 可写流，ctx.set 响应类型 text/event-stream。
+      document.querySelector('.btn').addEventListener('click', (e) => {
+        console.log('e: ', e)
+        const evtSource = new EventSource('http://127.0.0.1:8086/open-ai/sendMsg')
+        evtSource.onopen = function (event) {
+          console.log(`%c ~ onopen ~ event`, `color: blue;`, event, event.name, event.comment, event.data)
+        }
         evtSource.onmessage = function (event) {
-          console.log("message: " + event.data);
-          resultEl.innerHTML += event.data;
-        };
-      });
+          console.log(`%c ~ onmessage ~ event`, `color: green;`, event, event.name, event.comment, event.data)
+          resultEl.innerHTML += event.data
+        }
+        evtSource.onerror = function (event) {
+          console.log(`%c ~ onerror ~ event`, `color: red;`, event, event.name, event.comment, event.data)
+          evtSource.close()
+        }
+      })
     </script>
   </body>
 </html>

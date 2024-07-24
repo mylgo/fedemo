@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vue@2 demo</title>
+
+    <!-- Import Style -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <!-- Import Vue 2 -->
+    <script src="https://unpkg.com/vue@2"></script>
+    <!-- Import component library -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <!-- CSS Nesting Module -->
+    <style>
+      .wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 16px;
+        .condition-container {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          .el-input {
+            width: 400px;
+          }
+          .el-button {
+            margin-left: 16px;
+          }
+        }
+        .title {
+          margin-top: 24px;
+        }
+        .render-container {
+          margin-top: 16px;
+          padding: 16px;
+          border: 1px solid #ccc;
+          width: 800px;
+          border-radius: 8px;
+          height: 600px;
+          text-align: justify;
+          .item {
+            margin-bottom: 16px;
+          }
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="wrapper">
+        <div class="condition-container">
+          <el-input v-model="inputValue" @keyup.enter.native="handleEventSource"></el-input>
+          <el-button type="primary" @click="handleEventSource">请求</el-button>
+        </div>
+        <div class="title">渲染区：</div>
+        <div class="render-container">
+          <template v-if="isShowMessage">
+            <div v-for="(item, index) in messageQueue" :key="`queue_${index}`" class="item">
+              <div>{{ item.message }}</div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const app = new Vue({
+        el: '#app',
+        data: {
+          eventSource: null,
+          inputValue: '',
+          messageQueue: [],
+        },
+        computed: {
+          isShowMessage() {
+            return this.messageQueue.length > 0
+          },
+        },
+        methods: {
+          handleEventSource() {
+            this.messageQueue.push({ message: '' })
+            this.eventSource = new EventSource(`http://192.168.0.137:8080/funcCall/stream?msg=${this.inputValue}`)
+            this.eventSource.onopen = (event) => {
+              console.log(`%c ~ onopen ~ event`, `color: blue;`, event, event.data)
+            }
+            this.eventSource.onmessage = (event) => {
+              console.log(`%c ~ onmessage ~ event`, `color: green;`, event, event.data)
+              this.messageQueue[this.messageQueue.length - 1]['message'] += event.data
+            }
+            this.eventSource.onerror = (event) => {
+              console.log(`%c ~ onerror ~ event`, `color: red;`, event, event.data)
+              this.eventSource.close()
+            }
+          },
+        },
+      })
+    </script>
+  </body>
+</html>
