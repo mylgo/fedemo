@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>测试 /api/test 接口</title>
+</head>
+
+<body>
+  <h1>测试 /api/test 接口</h1>
+  <form id="testForm">
+    <label for="id">ID:</label>
+    <input type="text" id="id" name="id" value="3328"><br><br>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="你好"><br><br>
+    <button type="button" onclick="sendRequest()">发送请求</button>
+  </form>
+  <pre id="response"></pre>
+
+  <script>
+    async function sendRequest() {
+      const id = document.getElementById('id').value
+      const name = document.getElementById('name').value
+
+      const response = await fetch('http://localhost:3000/api/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'token': 'your-token-here' // 如果需要token，可以在这里设置
+        },
+        body: JSON.stringify({ id, name })
+      })
+
+      const responseData = await response.json()
+      document.getElementById('response').textContent = JSON.stringify(responseData, null, 2)
+    }
+  </script>
+</body>
+
+</html>
