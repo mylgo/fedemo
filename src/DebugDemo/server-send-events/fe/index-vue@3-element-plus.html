@@ -2,20 +2,24 @@
 <html lang="en">
 
 <head>
+  <!-- 设置文档字符编码为UTF-8 -->
   <meta charset="UTF-8" />
+  <!-- 设置移动设备的视口 -->
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0" />
+  <!-- 页面标题 -->
   <title>vue@3 element-plus demo</title>
 
-  <!-- import element-plus css -->
+  <!-- 引入Element Plus的样式文件 -->
   <link rel="stylesheet"
     href="https://unpkg.com/element-plus/dist/index.css" />
 
-  <!-- import vue@3 -->
+  <!-- 引入Vue 3框架 -->
   <script src="https://unpkg.com/vue@3"></script>
-  <!-- import element-plus component library -->
+  <!-- 引入Element Plus组件库 -->
   <script src="https://unpkg.com/element-plus"></script>
 
+  <!-- 页面样式定义 -->
   <style>
     .wrapper {
       width: 100%;
@@ -26,24 +30,29 @@
       align-items: flex-start;
       padding: 16px;
 
+      /* 输入区域容器样式 */
       .condition-container {
         display: flex;
         justify-content: flex-start;
         align-items: center;
 
+        /* Element Plus输入框样式覆盖 */
         .el-input {
           width: 400px;
         }
 
+        /* Element Plus按钮样式覆盖 */
         .el-button {
           margin-left: 16px;
         }
       }
 
+      /* 标题样式 */
       .title {
         margin-top: 24px;
       }
 
+      /* 消息渲染区域容器样式 */
       .render-container {
         margin-top: 16px;
         padding: 16px;
@@ -53,6 +62,7 @@
         height: 600px;
         text-align: justify;
 
+        /* 消息项样式 */
         .item {
           margin-bottom: 16px;
         }
@@ -62,17 +72,25 @@
 </head>
 
 <body>
+  <!-- Vue应用根容器 -->
   <div id="app">
     <div class="wrapper">
+      <!-- 输入区域 -->
       <div class="condition-container">
+        <!-- 输入框组件，绑定输入值和回车事件 -->
         <el-input v-model="inputValue"
           @keyup.enter="handleEventSource"></el-input>
+        <!-- 请求按钮，绑定点击事件 -->
         <el-button type="primary"
           @click="handleEventSource">请求</el-button>
       </div>
+      <!-- 渲染区域标题 -->
       <div class="title">渲染区：</div>
+      <!-- 消息渲染区域 -->
       <div class="render-container">
+        <!-- 当有消息时显示消息列表 -->
         <template v-if="isShowMessage">
+          <!-- 遍历消息队列渲染每条消息 -->
           <div v-for="(item, index) in messageQueue"
             :key="`queue_${index}`" class="item">
             <div>{{ item.message }}</div>
@@ -82,33 +100,51 @@
     </div>
   </div>
 
+  <!-- Vue应用脚本 -->
   <script>
+    // 从Vue中解构需要的API
     const { createApp, ref, computed } = Vue
+    // 定义Vue应用主组件
     const App = {
       setup() {
+        // 定义EventSource实例引用
         const eventSource = ref(null)
+        // 定义输入框的值
         const inputValue = ref('')
+        // 定义消息队列数组
         const messageQueue = ref([])
 
+        // 计算属性：是否显示消息区域
         const isShowMessage = computed(() => messageQueue.value.length > 0)
 
+        // 处理EventSource连接的方法
         const handleEventSource = () => {
+          // 在消息队列中添加新的消息对象
           messageQueue.value.push({ message: '' })
+          // 定义SSE服务器地址
           const eventSourceUrl = ref(`http://127.0.0.1:8086/open-ai/sendMsg`)
+          // 备用的SSE地址（已注释）
           // const eventSourceUrl = ref(`http://192.168.0.137:8080/funcCall/stream?msg=${inputValue.value}`)
+          // 创建新的EventSource实例
           eventSource.value = new EventSource(eventSourceUrl.value)
+          // 连接建立时的回调
           eventSource.value.onopen = (event) => {
             console.log(`%c ~ onopen ~ event`, `color: blue;`, event, event.data)
           }
+          // 接收消息时的回调
           eventSource.value.onmessage = (event) => {
             console.log(`%c ~ onmessage ~ event`, `color: green;`, event, event.data)
+            // 将接收到的消息追加到最新的消息对象中
             messageQueue.value[messageQueue.value.length - 1]['message'] += event.data
           }
+          // 发生错误时的回调
           eventSource.value.onerror = (event) => {
             console.log(`%c ~ onerror ~ event`, `color: red;`, event, event.data)
+            // 关闭EventSource连接
             eventSource.value.close()
           }
         }
+        // 返回模板中需要使用的数据和方法
         return {
           inputValue,
           messageQueue,
@@ -117,8 +153,11 @@
         }
       },
     }
+    // 创建Vue应用实例
     const app = Vue.createApp(App)
+    // 使用Element Plus插件
     app.use(ElementPlus)
+    // 挂载应用到DOM
     app.mount('#app')
   </script>
 </body>

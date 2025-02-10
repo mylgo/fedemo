@@ -2,48 +2,59 @@
 <html lang="en">
 
 <head>
+  <!-- 设置文档字符编码 -->
   <meta charset="UTF-8" />
+  <!-- 设置移动设备视口 -->
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0" />
+  <!-- 页面标题 -->
   <title>vue@2 demo</title>
 
-  <!-- Import Style -->
+  <!-- 引入Element UI的样式文件 -->
   <link rel="stylesheet"
     href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
-  <!-- Import Vue 2 -->
+  <!-- 引入Vue 2框架 -->
   <script src="https://unpkg.com/vue@2"></script>
-  <!-- Import component library -->
+  <!-- 引入Element UI组件库 -->
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
-  <!-- CSS Nesting Module -->
+  <!-- 页面样式定义，使用CSS嵌套语法 -->
   <style>
     .wrapper {
+      /* 容器铺满全屏 */
       width: 100%;
       height: 100%;
+      /* 使用flex布局，垂直排列 */
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
       padding: 16px;
 
+      /* 输入区域容器样式 */
       .condition-container {
+        /* 水平flex布局 */
         display: flex;
         justify-content: flex-start;
         align-items: center;
 
+        /* Element UI输入框宽度设置 */
         .el-input {
           width: 400px;
         }
 
+        /* Element UI按钮左边距 */
         .el-button {
           margin-left: 16px;
         }
       }
 
+      /* 标题区域样式 */
       .title {
         margin-top: 24px;
       }
 
+      /* 消息渲染区域样式 */
       .render-container {
         margin-top: 16px;
         padding: 16px;
@@ -53,6 +64,7 @@
         height: 600px;
         text-align: justify;
 
+        /* 每条消息的样式 */
         .item {
           margin-bottom: 16px;
         }
@@ -62,17 +74,25 @@
 </head>
 
 <body>
+  <!-- Vue应用根容器 -->
   <div id="app">
     <div class="wrapper">
+      <!-- 输入区域 -->
       <div class="condition-container">
+        <!-- 输入框组件，使用v-model双向绑定，监听回车事件（需要.native修饰符） -->
         <el-input v-model="inputValue"
           @keyup.enter.native="handleEventSource"></el-input>
+        <!-- 请求按钮 -->
         <el-button type="primary"
           @click="handleEventSource">请求</el-button>
       </div>
+      <!-- 渲染区域标题 -->
       <div class="title">渲染区：</div>
+      <!-- 消息渲染容器 -->
       <div class="render-container">
+        <!-- 当有消息时才显示消息列表 -->
         <template v-if="isShowMessage">
+          <!-- 遍历消息队列渲染每条消息 -->
           <div v-for="(item, index) in messageQueue"
             :key="`queue_${index}`" class="item">
             <div>{{ item.message }}</div>
@@ -82,34 +102,51 @@
     </div>
   </div>
 
+  <!-- Vue应用脚本 -->
   <script>
+    // 创建Vue实例
     const app = new Vue({
+      // 挂载点
       el: '#app',
+      // 数据属性
       data: {
-        eventSource: null,
-        inputValue: '',
-        messageQueue: [],
+        eventSource: null, // SSE连接实例
+        inputValue: '', // 输入框的值
+        messageQueue: [], // 消息队列数组
       },
+      // 计算属性
       computed: {
+        // 判断是否显示消息区域
         isShowMessage() {
           return this.messageQueue.length > 0
         },
       },
+      // 方法定义
       methods: {
+        // 处理SSE连接的方法
         handleEventSource() {
+          // 在消息队列中添加新的消息对象
           this.messageQueue.push({ message: '' })
+          // 定义SSE服务器地址
           const eventSourceUrl = `http://127.0.0.1:8086/open-ai/sendMsg`
+          // 备用的SSE地址（已注释）
           // const eventSourceUrl = `http://192.168.0.137:8080/funcCall/stream?msg=${this.inputValue}`
+          // 创建新的EventSource实例
           this.eventSource = new EventSource(eventSourceUrl)
+          // 连接建立时的回调
           this.eventSource.onopen = (event) => {
             console.log(`%c ~ onopen ~ event`, `color: blue;`, event, event.data)
           }
+          // 接收消息时的回调
           this.eventSource.onmessage = (event) => {
             console.log(`%c ~ onmessage ~ event`, `color: green;`, event, event.data)
+            // 将接收到的消息追加到最新的消息对象中
             this.messageQueue[this.messageQueue.length - 1]['message'] += event.data
           }
+          // 发生错误时的回调
           this.eventSource.onerror = (event) => {
             console.log(`%c ~ onerror ~ event`, `color: red;`, event, event.data)
+            // 关闭SSE连接
             this.eventSource.close()
           }
         },
