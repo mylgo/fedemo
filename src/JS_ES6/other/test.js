@@ -1,1 +1,1 @@
-alert('test dynamic script');
+alert('test dynamic script')

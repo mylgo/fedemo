@@ -1,11 +1,10 @@
-
 let count = 3
 
 function incrementCount() {
-    count++
+  count++
 }
 
-moudule.exports =  {
-    count: count,
-    incrementCount: incrementCount
+module.exports = {
+  count: count,
+  incrementCount: incrementCount,
 }

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>CSS跑马灯效果</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 基础跑马灯 - 从右到左 */
+    .marquee {
+      width: 100%;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 25px;
+      overflow: hidden;
+      position: relative;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .marquee-content {
+      position: absolute;
+      white-space: nowrap;
+      line-height: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      animation: scroll-left 15s linear infinite;
+    }
+
+    /* 从右到左滚动 */
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(100%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* 从左到右跑马灯 */
+    .marquee-right .marquee-content {
+      animation: scroll-right 12s linear infinite;
+    }
+
+    @keyframes scroll-right {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* 彩色跑马灯 */
+    .marquee-colorful {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+      background-size: 400% 400%;
+      animation: gradient-animation 3s ease infinite;
+    }
+
+    .marquee-colorful .marquee-content {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes gradient-animation {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* 垂直跑马灯 */
+    .marquee-vertical {
+      height: 150px;
+      width: 300px;
+      margin: 20px auto;
+    }
+
+    .marquee-vertical .marquee-content {
+      writing-mode: vertical-lr;
+      animation: scroll-up 10s linear infinite;
+      line-height: 1.5;
+      padding: 10px;
+    }
+
+    @keyframes scroll-up {
+      0% {
+        transform: translateY(100%);
+      }
+
+      100% {
+        transform: translateY(-100%);
+      }
+    }
+
+    /* 弹跳跑马灯 */
+    .marquee-bounce .marquee-content {
+      animation: bounce-scroll 8s ease-in-out infinite;
+    }
+
+    @keyframes bounce-scroll {
+
+      0%,
+      100% {
+        transform: translateX(100%);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+      }
+
+      50% {
+        transform: translateX(-100%);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+      }
+    }
+
+    /* 双向跑马灯 */
+    .marquee-double {
+      height: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .marquee-double .marquee-content {
+      position: absolute;
+      line-height: 30px;
+      font-size: 16px;
+    }
+
+    .marquee-double .marquee-content:first-child {
+      top: 0;
+      animation: scroll-left 12s linear infinite;
+      color: #e74c3c;
+    }
+
+    .marquee-double .marquee-content:last-child {
+      bottom: 0;
+      animation: scroll-right 10s linear infinite;
+      color: #3498db;
+    }
+
+    /* 暂停功能 */
+    .marquee:hover .marquee-content {
+      animation-play-state: paused;
+    }
+
+    /* 控制按钮 */
+    .controls {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .btn {
+      background: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .info {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🎠 CSS跑马灯效果展示 🎠</h1>
+
+    <div class="info">
+      <strong>提示：</strong>鼠标悬停在跑马灯上可以暂停动画
+    </div>
+
+    <!-- 基础跑马灯 - 从右到左 -->
+    <div class="marquee">
+      <div class="marquee-content">
+        🌟 欢迎访问我的网站！这是一个从右到左的跑马灯效果演示 🌟
+      </div>
+    </div>
+
+    <!-- 从左到右跑马灯 -->
+    <div class="marquee marquee-right">
+      <div class="marquee-content">
+        🚀 这是从左到右的跑马灯效果，速度稍快一些 🚀
+      </div>
+    </div>
+
+    <!-- 彩色渐变跑马灯 -->
+    <div class="marquee marquee-colorful">
+      <div class="marquee-content">
+        🌈 彩色渐变背景的跑马灯，更加炫酷！🌈
+      </div>
+    </div>
+
+    <!-- 垂直跑马灯 -->
+    <div class="marquee marquee-vertical">
+      <div class="marquee-content">
+        垂直滚动的跑马灯效果，从下往上移动，适合侧边栏使用 📊
+      </div>
+    </div>
+
+    <!-- 弹跳跑马灯 -->
+    <div class="marquee marquee-bounce">
+      <div class="marquee-content">
+        ⚡ 带有弹跳效果的跑马灯，动画更有趣味性 ⚡
+      </div>
+    </div>
+
+    <!-- 双向跑马灯 -->
+    <div class="marquee marquee-double">
+      <div class="marquee-content">
+        📈 上层文字从右到左移动
+      </div>
+      <div class="marquee-content">
+        📉 下层文字从左到右移动
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="toggleSpeed()">调整速度</button>
+      <button class="btn" onclick="toggleDirection()">切换方向</button>
+      <button class="btn" onclick="toggleAnimation()">暂停/播放</button>
+    </div>
+
+    <div class="info">
+      <strong>技术要点：</strong><br>
+      • 使用 <code>transform: translateX()</code> 实现平移动画<br>
+      • 配合 <code>@keyframes</code> 定义动画关键帧<br>
+      • <code>animation-timing-function</code> 控制动画速度曲线<br>
+      • <code>:hover</code> 伪类实现鼠标悬停暂停效果
+    </div>
+  </div>
+
+  <script>
+    let isAnimationPaused = false
+    let currentSpeed = 'normal'
+
+    function toggleAnimation() {
+      const marquees = document.querySelectorAll('.marquee-content')
+      isAnimationPaused = !isAnimationPaused
+
+      marquees.forEach(marquee => {
+        marquee.style.animationPlayState = isAnimationPaused ? 'paused' : 'running'
+      })
+
+      event.target.textContent = isAnimationPaused ? '播放' : '暂停'
+    }
+
+    function toggleSpeed() {
+      const marquees = document.querySelectorAll('.marquee-content')
+
+      if (currentSpeed === 'normal') {
+        currentSpeed = 'fast'
+        marquees.forEach(marquee => {
+          marquee.style.animationDuration = '5s'
+        })
+        event.target.textContent = '快速模式'
+      } else if (currentSpeed === 'fast') {
+        currentSpeed = 'slow'
+        marquees.forEach(marquee => {
+          marquee.style.animationDuration = '25s'
+        })
+        event.target.textContent = '慢速模式'
+      } else {
+        currentSpeed = 'normal'
+        marquees.forEach(marquee => {
+          marquee.style.animationDuration = ''
+        })
+        event.target.textContent = '正常模式'
+      }
+    }
+
+    function toggleDirection() {
+      const marquees = document.querySelectorAll('.marquee-content')
+
+      marquees.forEach(marquee => {
+        const currentAnimation = marquee.style.animationDirection || 'normal'
+        marquee.style.animationDirection = currentAnimation === 'normal' ? 'reverse' : 'normal'
+      })
+
+      const btn = event.target
+      btn.textContent = btn.textContent.includes('反向') ? '正向滚动' : '反向滚动'
+    }
+  </script>
+</body>
+
+</html>

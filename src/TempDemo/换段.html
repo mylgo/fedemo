@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    #app {
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #app p {
+      margin-bottom: 24px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+      color: #000000;
+      text-align: justify;
+      text-indent: 2em;
+    }
+
+    #app p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script>
+    const fullContent = `经查明，凯瑞德存在以下违法事实：
+一、未按规定披露对外担保事项2014年10月至2018年11月期间，凯瑞德为新疆德棉矿业有限公司、创越能源集团有限公司、第五季国际投资控股有限公司、浙江第五季实业有限公司、深圳市丹尔斯顿实业有限公司、吴联模提供9笔对外担保，金额合计46,593.57万元（含最高额担保），其中为关联方提供担保33,593.57万元。
+其中2014年至2020年年度报告中未披露或少披露的担保余额分别为6,000万元、21,193.65万元、22,977.75万元、40,405.97万元、37,935.51万元、21,653.04万元、17,382.83万元，占公司当期净资产绝对值的比例分别为32.02%、260.03%、239.70%、634.60%、200.15%、774.76%、99.68%。
+二、未按规定披露重大诉讼、仲裁事项2015年4月至2019年2月期间，凯瑞德未按规定及时披露55笔重大诉讼、仲裁事项，金额合计95,438.66万元。
+三、法律责任认定凯瑞德的上述行为违反了\n2005年《证券法》第六十三条、《证券法》第七十八条第一款和第二款的规定，构成2005年《证券法》第一百九十三条第一款、《证券法》第一百九十七条第一款和第二款所述的违法行为。`
+
+    /**
+     * 判断是否为HTML代码的函数
+     */
+    function isHTMLContent(content) {
+      const trimmedContent = content.trim()
+
+      // 简单但有效的HTML检测
+      return trimmedContent.startsWith('<html') ||
+        trimmedContent.startsWith('<!DOCTYPE') ||
+        trimmedContent.endsWith('</html>') ||
+        /^<[a-z]+[\s>]/i.test(trimmedContent)  // 以标签开始
+    }
+
+    /**
+     * 按照连续的换行符分段的函数
+     */
+    function formatTextToParagraphs(text) {
+      // 数据库中\n直接作为段落分隔符，按照任意数量的\n进行分段
+      const paragraphs = text
+        .trim() // 去除首尾空白
+        .split(/\n+/) // 按照1个或更多连续的\n分段
+        .filter(paragraph => paragraph.trim()) // 过滤空段落
+        .map(paragraph => {
+          // 清理段落内容，去除多余空格
+          return paragraph
+            .replace(/\s+/g, ' ') // 将多个空格合并为一个
+            .trim() // 去除首尾空格
+        })
+
+      return paragraphs
+    }
+
+    /**
+     * 将段落转换为HTML
+     */
+    function createParagraphsHTML(paragraphs) {
+      return paragraphs
+        .map(paragraph => `<p>${paragraph}</p>`)
+        .join('')
+    }
+
+    /**
+     * 将文本转换为段落HTML的函数
+     */
+    function formatTextToHTML(text) {
+      return isHTMLContent(text) ? text : createParagraphsHTML(formatTextToParagraphs(text))
+    }
+
+    // 处理文本并显示
+    const app = document.getElementById('app')
+
+    // 判断内容类型并处理
+    if (isHTMLContent(fullContent)) {
+      console.log('检测到HTML内容，保持原样')
+      app.innerHTML = fullContent
+    } else {
+      console.log('检测到纯文本内容，应用段落转换')
+      const html = formatTextToHTML(fullContent)
+      app.innerHTML = html
+
+      // 在控制台输出分段结果，便于调试
+      console.log('分段结果：', formatTextToParagraphs(fullContent))
+      console.log('段落数量：', formatTextToParagraphs(fullContent).length)
+    }
+  </script>
+</body>
+
+</html>
