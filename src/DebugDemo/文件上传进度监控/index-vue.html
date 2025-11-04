@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0" />
+  <title>文件上传进度监控 - Vue@2 Element UI</title>
+
+  <!-- import element-ui css -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+
+  <!-- import vue@2 -->
+  <script src="https://unpkg.com/vue@2"></script>
+  <!-- import element-ui component library -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .upload-area {
+      margin-bottom: 30px;
+    }
+
+    /* 确保 el-upload 组件宽度为 100% */
+    .upload-area .el-upload {
+      width: 100%;
+      display: block;
+    }
+
+    .el-upload-dragger {
+      width: 100%;
+      height: auto;
+      padding: 40px;
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      background: #f8f9ff;
+      transition: all 0.3s ease;
+    }
+
+    .el-upload-dragger:hover {
+      border-color: #764ba2;
+    }
+
+    .upload-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .upload-text {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .upload-hint {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .file-info-card {
+      margin: 20px 0;
+      background: #f8f9ff;
+      border: none;
+      border-radius: 10px;
+    }
+
+    /* 覆盖 Element UI Card 的默认样式 */
+    .file-info-card.el-card {
+      border-radius: 10px;
+    }
+
+    .file-info-card .el-card__body {
+      padding: 15px;
+    }
+
+    .file-info-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .file-info-item strong {
+      color: #333;
+    }
+
+    .upload-button {
+      width: 100%;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 25px;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .upload-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .upload-button:disabled {
+      background: #ccc;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .progress-section {
+      margin: 20px 0;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .speed-info {
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      background: #f8f9ff;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .result-section {
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* 自定义 Element UI 进度条颜色 */
+    .el-progress__text {
+      font-weight: bold !important;
+    }
+
+    .el-progress-bar__inner {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>📤 文件上传进度监控</h1>
+
+      <!-- 上传区域 -->
+      <div class="upload-area">
+        <el-upload
+          drag
+          :auto-upload="false"
+          :show-file-list="false"
+          :on-change="handleFileChange"
+          action="#">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">点击选择文件或拖拽文件到此处</div>
+          <div class="upload-hint">支持任意格式文件</div>
+        </el-upload>
+      </div>
+
+      <!-- 文件信息 -->
+      <transition name="el-fade-in">
+        <el-card v-if="selectedFile" class="file-info-card"
+          shadow="never">
+          <div class="file-info-item">
+            <span><strong>文件名：</strong></span>
+            <span>{{ selectedFile.name }}</span>
+          </div>
+          <div class="file-info-item">
+            <span><strong>文件大小：</strong></span>
+            <span>{{ formatFileSize(selectedFile.size) }}</span>
+          </div>
+          <div class="file-info-item">
+            <span><strong>文件类型：</strong></span>
+            <span>{{ selectedFile.type || '未知' }}</span>
+          </div>
+        </el-card>
+      </transition>
+
+      <!-- 上传按钮 -->
+      <el-button
+        type="primary"
+        class="upload-button"
+        :disabled="!selectedFile || uploading"
+        @click="uploadFile">
+        {{ uploading ? '上传中...' : '开始上传' }}
+      </el-button>
+
+      <!-- 进度条 -->
+      <transition name="el-fade-in">
+        <div v-show="showProgress"
+          class="progress-section">
+          <el-progress
+            :percentage="uploadProgress"
+            :status="uploadComplete && uploadProgress === 100 ? 'success' : undefined"
+            :stroke-width="24"></el-progress>
+          <div class="progress-info">
+            <span>已上传：{{ formatFileSize(uploadedBytes) }} /
+              {{ formatFileSize(totalBytes) }}</span>
+            <span class="speed-info">速度：{{ formatFileSize(uploadSpeed)
+              }}/s</span>
+          </div>
+        </div>
+      </transition>
+
+      <!-- 统计信息 -->
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">耗时</div>
+          <div class="stat-value">{{ elapsedTime }}s</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">剩余时间</div>
+          <div class="stat-value">{{ remainingTime }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">平均速度</div>
+          <div class="stat-value">{{ formatFileSize(avgSpeed) }}/s
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果提示 -->
+      <transition name="el-fade-in">
+        <div v-if="resultMessage" class="result-section">
+          <el-alert
+            :title="resultMessage"
+            :type="resultType"
+            :closable="false"
+            show-icon></el-alert>
+        </div>
+      </transition>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        selectedFile: null,
+        uploading: false,
+        uploadComplete: false,
+        uploadProgress: 0,
+        uploadedBytes: 0,
+        totalBytes: 0,
+        uploadSpeed: 0,
+        avgSpeed: 0,
+        elapsedTime: 0,
+        remainingTime: '-',
+        resultMessage: '',
+        resultType: 'success',
+        startTime: null,
+        xhr: null,
+        showProgress: false,
+      },
+      methods: {
+        // 文件选择处理
+        handleFileChange(file) {
+          this.selectedFile = file.raw
+          // 选择新文件时重置进度和结果（与 index.html 行为一致）
+          this.resetProgress()
+        },
+
+        // 格式化文件大小
+        formatFileSize(bytes) {
+          if (!bytes || bytes === 0) return '0 Bytes'
+          const k = 1024
+          const sizes = ['Bytes', 'KB', 'MB', 'GB']
+          const i = Math.floor(Math.log(bytes) / Math.log(k))
+          return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+        },
+
+        // 重置进度
+        resetProgress() {
+          this.uploading = false
+          this.uploadComplete = false
+          this.uploadProgress = 0
+          this.uploadedBytes = 0
+          this.totalBytes = 0
+          this.uploadSpeed = 0
+          this.avgSpeed = 0
+          this.elapsedTime = 0
+          this.remainingTime = '-'
+          this.resultMessage = ''
+          this.showProgress = false
+          if (this.xhr) {
+            this.xhr.abort()
+            this.xhr = null
+          }
+        },
+
+        // 上传文件
+        uploadFile() {
+          if (!this.selectedFile) return
+
+          const formData = new FormData()
+          formData.append('file', this.selectedFile)
+
+          this.xhr = new XMLHttpRequest()
+          this.startTime = Date.now()
+
+          // 上传开始时的处理
+          this.xhr.upload.addEventListener('loadstart', () => {
+            this.uploading = true
+            this.showProgress = true
+            this.resultMessage = ''
+            this.uploadComplete = false
+          })
+
+          // 上传进度
+          this.xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              this.uploadProgress = Math.round((e.loaded / e.total) * 100)
+              this.uploadedBytes = e.loaded
+              this.totalBytes = e.total
+
+              // 计算速度和时间
+              const elapsed = (Date.now() - this.startTime) / 1000 // 秒
+              const speed = e.loaded / elapsed // 字节/秒
+              const remaining = (e.total - e.loaded) / speed // 秒
+
+              this.uploadSpeed = speed
+              this.avgSpeed = speed
+              this.elapsedTime = Math.round(elapsed)
+              this.remainingTime = remaining > 0 ? Math.round(remaining) + 's' : '-'
+            }
+          })
+
+          // 上传完成
+          this.xhr.addEventListener('load', () => {
+            this.uploading = false
+
+            if (this.xhr.status === 200) {
+              // 确保进度条显示为 100%
+              this.uploadProgress = 100
+              this.uploadComplete = true
+              // 保持 showProgress 为 true，让进度条继续显示
+
+              try {
+                const response = JSON.parse(this.xhr.responseText)
+                this.resultType = 'success'
+                this.resultMessage = `✅ 上传成功！${response.originalname} → ${response.filename}`
+              } catch (e) {
+                this.resultType = 'success'
+                this.resultMessage = '✅ 上传成功！'
+              }
+            } else {
+              this.uploadComplete = false
+              this.resultType = 'error'
+              this.resultMessage = `❌ 上传失败：${this.xhr.statusText}`
+            }
+          })
+
+          // 上传错误
+          this.xhr.addEventListener('error', () => {
+            this.uploading = false
+            this.uploadComplete = false
+            this.resultType = 'error'
+            this.resultMessage = '❌ 上传过程中发生错误'
+          })
+
+          // 上传取消
+          this.xhr.addEventListener('abort', () => {
+            this.uploading = false
+            this.uploadComplete = false
+            this.resultType = 'warning'
+            this.resultMessage = '⚠️ 上传已取消'
+          })
+
+          // 发送请求
+          this.xhr.open('POST', 'http://localhost:3000/upload', true)
+          this.xhr.send(formData)
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>
