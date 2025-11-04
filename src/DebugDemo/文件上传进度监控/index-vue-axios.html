@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0" />
+  <title>文件上传进度监控 - Vue@2 Element UI Axios</title>
+
+  <!-- import element-ui css -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+
+  <!-- import vue@2 -->
+  <script src="https://unpkg.com/vue@2"></script>
+  <!-- import element-ui component library -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <!-- import axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .upload-area {
+      margin-bottom: 30px;
+    }
+
+    /* 确保 el-upload 组件宽度为 100% */
+    .upload-area .el-upload {
+      width: 100%;
+      display: block;
+    }
+
+    .el-upload-dragger {
+      width: 100%;
+      height: auto;
+      padding: 40px;
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      background: #f8f9ff;
+      transition: all 0.3s ease;
+    }
+
+    .el-upload-dragger:hover {
+      border-color: #764ba2;
+    }
+
+    .upload-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .upload-text {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .upload-hint {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .file-info-card {
+      margin: 20px 0;
+      background: #f8f9ff;
+      border: none;
+      border-radius: 10px;
+    }
+
+    /* 覆盖 Element UI Card 的默认样式 */
+    .file-info-card.el-card {
+      border-radius: 10px;
+    }
+
+    .file-info-card .el-card__body {
+      padding: 15px;
+    }
+
+    .file-info-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .file-info-item strong {
+      color: #333;
+    }
+
+    .upload-button {
+      width: 100%;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 25px;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .upload-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .upload-button:disabled {
+      background: #ccc;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .progress-section {
+      margin: 20px 0;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .speed-info {
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      background: #f8f9ff;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .result-section {
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* 自定义 Element UI 进度条颜色 */
+    .el-progress__text {
+      font-weight: bold !important;
+    }
+
+    .el-progress-bar__inner {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    /* 隐藏进度条百分比数值 */
+    .progress-section .el-progress__text {
+      display: none !important;
+    }
+
+    /* 防止 Element UI 组件宽度溢出 */
+    .el-card,
+    .el-button,
+    .el-progress,
+    .el-alert {
+      max-width: 100%;
+    }
+
+    /* 确保 el-alert 不会撑宽容器 */
+    .result-section .el-alert {
+      word-break: break-word;
+    }
+
+    .result-section .el-alert__title {
+      word-break: break-word;
+      white-space: normal;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>📤 文件上传进度监控 (Axios)</h1>
+
+      <!-- 上传区域 -->
+      <div class="upload-area">
+        <el-upload
+          drag
+          :auto-upload="false"
+          :show-file-list="false"
+          :on-change="handleFileChange"
+          action="#">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">点击选择文件或拖拽文件到此处</div>
+          <div class="upload-hint">支持任意格式文件</div>
+        </el-upload>
+      </div>
+
+      <!-- 文件信息 -->
+      <transition name="el-fade-in">
+        <el-card v-if="selectedFile" class="file-info-card"
+          shadow="never">
+          <div class="file-info-item">
+            <span><strong>文件名：</strong></span>
+            <span>{{ selectedFile.name }}</span>
+          </div>
+          <div class="file-info-item">
+            <span><strong>文件大小：</strong></span>
+            <span>{{ formatFileSize(selectedFile.size) }}</span>
+          </div>
+          <div class="file-info-item">
+            <span><strong>文件类型：</strong></span>
+            <span>{{ selectedFile.type || '未知' }}</span>
+          </div>
+        </el-card>
+      </transition>
+
+      <!-- 上传按钮 -->
+      <el-button
+        type="primary"
+        class="upload-button"
+        :disabled="!selectedFile || uploading"
+        @click="uploadFile">
+        {{ uploading ? '上传中...' : '开始上传' }}
+      </el-button>
+
+      <!-- 进度条 -->
+      <transition name="el-fade-in">
+        <div v-show="showProgress"
+          class="progress-section">
+          <el-progress
+            :percentage="uploadProgress"
+            :status="uploadComplete && uploadProgress === 100 ? 'success' : undefined"
+            :stroke-width="24"></el-progress>
+          <div class="progress-info">
+            <span>已上传：{{ formatFileSize(uploadedBytes) }} /
+              {{ formatFileSize(totalBytes) }}</span>
+            <span class="speed-info">速度：{{ formatFileSize(uploadSpeed)
+              }}/s</span>
+          </div>
+        </div>
+      </transition>
+
+      <!-- 统计信息 -->
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">耗时</div>
+          <div class="stat-value">{{ elapsedTime }}s</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">剩余时间</div>
+          <div class="stat-value">{{ remainingTime }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">平均速度</div>
+          <div class="stat-value">{{ formatFileSize(avgSpeed) }}/s
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果提示 -->
+      <transition name="el-fade-in">
+        <div v-if="resultMessage" class="result-section">
+          <el-alert
+            :title="resultMessage"
+            :type="resultType"
+            :closable="false"
+            show-icon></el-alert>
+        </div>
+      </transition>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        selectedFile: null,
+        uploading: false,
+        uploadComplete: false,
+        uploadProgress: 0,
+        uploadedBytes: 0,
+        totalBytes: 0,
+        uploadSpeed: 0,
+        avgSpeed: 0,
+        elapsedTime: 0,
+        remainingTime: '-',
+        resultMessage: '',
+        resultType: 'success',
+        startTime: null,
+        cancelTokenSource: null, // axios 取消令牌
+        showProgress: false,
+      },
+      methods: {
+        // 文件选择处理
+        handleFileChange(file) {
+          this.selectedFile = file.raw
+          // 选择新文件时重置进度和结果（与 index.html 行为一致）
+          this.resetProgress()
+        },
+
+        // 格式化文件大小
+        formatFileSize(bytes) {
+          if (!bytes || bytes === 0) return '0 Bytes'
+          const k = 1024
+          const sizes = ['Bytes', 'KB', 'MB', 'GB']
+          const i = Math.floor(Math.log(bytes) / Math.log(k))
+          return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+        },
+
+        // 重置进度
+        resetProgress() {
+          this.uploading = false
+          this.uploadComplete = false
+          this.uploadProgress = 0
+          this.uploadedBytes = 0
+          this.totalBytes = 0
+          this.uploadSpeed = 0
+          this.avgSpeed = 0
+          this.elapsedTime = 0
+          this.remainingTime = '-'
+          this.resultMessage = ''
+          this.showProgress = false
+
+          // 取消正在进行的上传
+          if (this.cancelTokenSource) {
+            this.cancelTokenSource.cancel('上传已取消')
+            this.cancelTokenSource = null
+          }
+        },
+
+        // 上传文件（使用 axios）
+        async uploadFile() {
+          if (!this.selectedFile) return
+
+          const formData = new FormData()
+          formData.append('file', this.selectedFile)
+
+          // 创建取消令牌
+          this.cancelTokenSource = axios.CancelToken.source()
+          this.startTime = Date.now()
+
+          // 重置状态
+          this.uploading = true
+          this.showProgress = true
+          this.resultMessage = ''
+          this.uploadComplete = false
+
+          try {
+            const response = await axios.post('http://localhost:3000/upload', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+              cancelToken: this.cancelTokenSource.token,
+              // 上传进度回调
+              onUploadProgress: (progressEvent) => {
+                if (progressEvent.lengthComputable) {
+                  // 计算进度百分比
+                  this.uploadProgress = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+                  this.uploadedBytes = progressEvent.loaded
+                  this.totalBytes = progressEvent.total
+
+                  // 计算速度和时间
+                  const elapsed = (Date.now() - this.startTime) / 1000 // 秒
+                  const speed = progressEvent.loaded / elapsed // 字节/秒
+                  const remaining = (progressEvent.total - progressEvent.loaded) / speed // 秒
+
+                  this.uploadSpeed = speed
+                  this.avgSpeed = speed
+                  this.elapsedTime = Math.round(elapsed)
+                  this.remainingTime = remaining > 0 ? Math.round(remaining) + 's' : '-'
+                }
+              }
+            })
+
+            // 上传成功
+            this.uploading = false
+            this.uploadProgress = 100
+            this.uploadComplete = true
+            this.resultType = 'success'
+
+            if (response.data && response.data.originalname) {
+              this.resultMessage = `✅ 上传成功！${response.data.originalname} → ${response.data.filename}`
+            } else {
+              this.resultMessage = '✅ 上传成功！'
+            }
+
+          } catch (error) {
+            this.uploading = false
+            this.uploadComplete = false
+
+            if (axios.isCancel(error)) {
+              // 用户取消上传
+              this.resultType = 'warning'
+              this.resultMessage = '⚠️ 上传已取消'
+            } else if (error.response) {
+              // 服务器响应错误
+              this.resultType = 'error'
+              this.resultMessage = `❌ 上传失败：${error.response.statusText || '服务器错误'}`
+            } else if (error.request) {
+              // 请求发送失败
+              this.resultType = 'error'
+              this.resultMessage = '❌ 上传失败：网络错误'
+            } else {
+              // 其他错误
+              this.resultType = 'error'
+              this.resultMessage = `❌ 上传失败：${error.message}`
+            }
+          }
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>
