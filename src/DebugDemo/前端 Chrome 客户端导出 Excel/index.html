@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>Chrome 导出 Excel 功能</title>
+  <!-- 引入 Element UI 样式 -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    body {
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .export-section {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .info-box {
+      background: #f5f7fa;
+      padding: 20px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>Excel 错误报告导出系统</h1>
+      <p>用于导出财务报表错误检测结果</p>
+    </div>
+
+    <!-- 错误数据表格 -->
+    <el-card>
+      <div slot="header">
+        <span>错误数据列表</span>
+        <el-button
+          style="float: right; padding: 3px 0"
+          type="text"
+          @click="addErrorRow">
+          添加错误记录
+        </el-button>
+      </div>
+
+      <el-table
+        :data="errorData"
+        stripe
+        border
+        style="width: 100%">
+        <el-table-column
+          prop="index"
+          label="序号"
+          width="80"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="tableName"
+          label="表格名称"
+          width="200">
+        </el-table-column>
+        <el-table-column
+          prop="errorType"
+          label="错误类型"
+          width="200">
+        </el-table-column>
+        <el-table-column
+          prop="cellCoordinates"
+          label="错误的单元格坐标">
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          width="100"
+          align="center">
+          <template slot-scope="scope">
+            <el-button
+              type="danger"
+              size="mini"
+              @click="deleteRow(scope.$index)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 导出按钮区域 -->
+    <div class="export-section">
+      <el-button
+        type="primary"
+        size="large"
+        icon="el-icon-download"
+        @click="exportToExcel"
+        :loading="exporting">
+        导出为 Excel
+      </el-button>
+      <el-button
+        size="large"
+        @click="resetData">
+        重置数据
+      </el-button>
+    </div>
+
+    <!-- 说明信息 -->
+    <div class="info-box">
+      <h3>使用说明：</h3>
+      <ul>
+        <li>点击"添加错误记录"可以添加新的测试数据</li>
+        <li>点击"导出为 Excel"按钮将数据导出为【错误报告.xlsx】文件</li>
+        <li>导出的 Excel 包含三列：表格名称、错误类型、错误的单元格坐标</li>
+        <li>示例数据格式：1-资产负债表 | 数据类型错误 | C6,D6,E6,F6</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 引入依赖库 -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <meta name="filename" content="user-management.html">
+  <title>用户管理系统</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script
+    src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-dark: #5d4ae3;
+      --secondary: #a29bfe;
+      --accent: #fd79a8;
+      --background: #f8f9fc;
+      --card-bg: #ffffff;
+      --text: #2d3436;
+      --text-light: #636e72;
+      --border: #dfe6e9;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #ff7675;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 布局容器 */
+    .container {
+      display: flex;
+      min-height: 100vh;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* 侧边导航 */
+    .sidebar {
+      width: 260px;
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .logo {
+      padding: 0 1.5rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+      color: var(--primary);
+    }
+
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .nav-item {
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+    }
+
+    .nav-item i {
+      font-size: 1.2rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* 主内容区域 */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: rgba(108, 92, 231, 0.1);
+    }
+
+    /* 搜索过滤区域 */
+    .search-section {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .search-container {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 3rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+    }
+
+    .filter-select {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 1rem;
+      min-width: 180px;
+    }
+
+    /* 用户列表卡片布局 */
+    .card-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stats {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .stat {
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .user-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow);
+      border-color: var(--primary);
+    }
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .user-role {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      background: rgba(108, 92, 231, 0.1);
+      display: inline-block;
+    }
+
+    .user-details {
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 0.2rem;
+    }
+
+    .detail-value {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .user-status {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: rgba(0, 184, 148, 0.2);
+      color: var(--success);
+    }
+
+    .status-inactive {
+      background: rgba(255, 118, 117, 0.2);
+      color: var(--danger);
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .edit-btn {
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+    }
+
+    .edit-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .delete-btn {
+      background: rgba(255, 118, 117, 0.1);
+      color: var(--danger);
+    }
+
+    .delete-btn:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* 图表组件 */
+    .charts-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .chart-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .chart-container {
+      height: 300px;
+      width: 100%;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 80px;
+      }
+
+      .logo span,
+      .nav-item span {
+        display: none;
+      }
+
+      .logo {
+        justify-content: center;
+      }
+
+      .nav-item {
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .users-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .charts-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 1rem 0;
+      }
+
+      .logo {
+        padding: 0 1rem;
+      }
+
+      .nav-menu {
+        display: flex;
+        overflow-x: auto;
+      }
+
+      .nav-item {
+        padding: 0.8rem 1rem;
+        min-width: fit-content;
+        border-left: none;
+        border-bottom: 4px solid transparent;
+      }
+
+      .nav-item:hover,
+      .nav-item.active {
+        border-left: none;
+        border-bottom: 4px solid var(--primary);
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .users-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 侧边导航 -->
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-users-cog"></i>
+        <span>用户管理系统</span>
+      </div>
+      <div class="nav-menu">
+        <a href="#" class="nav-item active">
+          <i class="fas fa-users"></i>
+          <span>用户管理</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <span>数据统计</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-cog"></i>
+          <span>系统设置</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-file-alt"></i>
+          <span>日志记录</span>
+        </a>
+        <a href="#" class="nav-item">
+          <i class="fas fa-question-circle"></i>
+          <span>帮助中心</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <div class="header">
+        <h2>用户管理</h2>
+        <div class="actions">
+          <button class="btn btn-outline">
+            <i class="fas fa-download"></i> 导出数据
+          </button>
+          <button class="btn btn-primary" id="addUserBtn">
+            <i class="fas fa-plus"></i> 添加用户
+          </button>
+        </div>
+      </div>
+
+      <!-- 搜索区域 -->
+      <div class="search-section">
+        <div class="search-container">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="搜索用户...">
+          </div>
+          <select class="filter-select">
+            <option>所有角色</option>
+            <option>管理员</option>
+            <option>编辑</option>
+            <option>普通用户</option>
+          </select>
+          <select class="filter-select">
+            <option>所有状态</option>
+            <option>活跃</option>
+            <option>禁用</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 用户列表 -->
+      <div class="card-section">
+        <div class="card-header">
+          <div class="card-title">用户列表</div>
+          <div class="stats">
+            <div class="stat">总用户数：<span id="totalUsers">28</span>
+            </div>
+            <div class="stat">活跃用户：<span id="activeUsers">22</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="users-grid">
+          <!-- 用户卡片1 -->
+          <div class="user-card">
+            <div class="user-header">
+              <div class="user-avatar">
+                <img
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200"
+                  alt="张明">
+              </div>
+              <div class="user-info">
+                <div class="user-name">张明</div>
+                <div class="user-role">管理员</div>
+              </div>
+            </div>
+            <div class="user-status status-active">活跃</div>
+
+            <div class="user-details">
+              <div class="detail-item">
+                <span class="detail-label">邮箱</span>
+                <span
+                  class="detail-value">zhangming@example.com</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">电话</span>
+                <span class="detail-value">13800138000</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">注册日期</span>
+                <span class="detail-value">2023-01-15</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">最后登录</span>
+                <span class="detail-value">2023-10-08</span>
+              </div>
+            </div>
+
+            <div class="user-actions">
+              <button class="action-btn edit-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 用户卡片2 -->
+          <div class="user-card">
+            <div class="user-header">
+              <div class="user-avatar">
+                <img
+                  src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=200"
+                  alt="李华">
+              </div>
+              <div class="user-info">
+                <div class="user-name">李华</div>
+                <div class="user-role">编辑</div>
+              </div>
+            </div>
+            <div class="user-status status-active">活跃</div>
+
+            <div class="user-details">
+              <div class="detail-item">
+                <span class="detail-label">邮箱</span>
+                <span class="detail-value">lihua@example.com</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">电话</span>
+                <span class="detail-value">13900139000</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">注册日期</span>
+                <span class="detail-value">2023-03-22</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">最后登录</span>
+                <span class="detail-value">2023-10-05</span>
+              </div>
+            </div>
+
+            <div class="user-actions">
+              <button class="action-btn edit-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 用户卡片3 -->
+          <div class="user-card">
+            <div class="user-header">
+              <div class="user-avatar">
+                <img
+                  src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200"
+                  alt="王芳">
+              </div>
+              <div class="user-info">
+                <div class="user-name">王芳</div>
+                <div class="user-role">普通用户</div>
+              </div>
+            </div>
+            <div class="user-status status-inactive">禁用</div>
+
+            <div class="user-details">
+              <div class="detail-item">
+                <span class="detail-label">邮箱</span>
+                <span class="detail-value">wangfang@example.com</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">电话</span>
+                <span class="detail-value">13700137000</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">注册日期</span>
+                <span class="detail-value">2023-05-18</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">最后登录</span>
+                <span class="detail-value">2023-09-01</span>
+              </div>
+            </div>
+
+            <div class="user-actions">
+              <button class="action-btn edit-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 用户卡片4 -->
+          <div class="user-card">
+            <div class="user-header">
+              <div class="user-avatar">
+                <img
+                  src="https://images.unsplash.com/photo-1485178575877-1a13bf489dfe?auto=format&fit=crop&w=200"
+                  alt="陈晨">
+              </div>
+              <div class="user-info">
+                <div class="user-name">陈晨</div>
+                <div class="user-role">管理员</div>
+              </div>
+            </div>
+            <div class="user-status status-active">活跃</div>
+
+            <div class="user-details">
+              <div class="detail-item">
+                <span class="detail-label">邮箱</span>
+                <span class="detail-value">chenchen@example.com</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">电话</span>
+                <span class="detail-value">13600136000</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">注册日期</span>
+                <span class="detail-value">2023-02-10</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">最后登录</span>
+                <span class="detail-value">2023-10-10</span>
+              </div>
+            </div>
+
+            <div class="user-actions">
+              <button class="action-btn edit-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表区域 -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <div class="chart-title">用户角色分布</div>
+          <div class="chart-container" id="roleChart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">用户增长趋势</div>
+          <div class="chart-container" id="growthChart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 初始化用户角色分布图表
+    const roleChart = echarts.init(document.getElementById('roleChart'))
+    const roleOption = {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'vertical',
+        right: 10,
+        top: 'center',
+        data: ['管理员', '编辑', '普通用户']
+      },
+      series: [
+        {
+          name: '用户角色',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '16',
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: [
+            { value: 8, name: '管理员', itemStyle: { color: '#6c5ce7' } },
+            { value: 5, name: '编辑', itemStyle: { color: '#a29bfe' } },
+            { value: 15, name: '普通用户', itemStyle: { color: '#fd79a8' } }
+          ]
+        }
+      ]
+    }
+    roleChart.setOption(roleOption)
+
+    // 初始化用户增长趋势图表
+    const growthChart = echarts.init(document.getElementById('growthChart'))
+    const growthOption = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: [
+        {
+          type: 'category',
+          data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月'],
+          axisTick: {
+            alignWithLabel: true
+          }
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value',
+          name: '用户数'
+        }
+      ],
+      series: [
+        {
+          name: '新增用户',
+          type: 'bar',
+          barWidth: '60%',
+          data: [12, 8, 6, 11, 7, 4, 15, 8, 10, 5],
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#6c5ce7' },
+              { offset: 1, color: '#a29bfe' }
+            ])
+          }
+        }
+      ]
+    }
+    growthChart.setOption(growthOption)
+
+    // 添加简单的交互效果
+    document.querySelectorAll('.user-card').forEach(card => {
+      card.addEventListener('click', function (e) {
+        if (!e.target.closest('.action-btn')) {
+          this.classList.toggle('expanded')
+        }
+      })
+    })
+
+    window.addEventListener('resize', function () {
+      roleChart.resize()
+      growthChart.resize()
+    });
+  </script>
+</body>
+
+</html>
