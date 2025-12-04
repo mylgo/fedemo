@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>IPO 数据错误报告导出</title>
+  <!-- 引入 Element UI 样式 -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    body {
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .export-section {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .info-box {
+      background: #f5f7fa;
+      padding: 20px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    .json-preview {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="header">
+      <h1>IPO 数据错误报告导出系统</h1>
+      <p>用于导出 IPO 报表错误检测结果</p>
+    </div>
+
+    <!-- 原始数据预览 -->
+    <el-card style="margin-bottom: 20px;">
+      <div slot="header">
+        <span>原始 JSON 数据</span>
+      </div>
+      <pre class="json-preview">{{ formattedJsonData }}</pre>
+    </el-card>
+
+    <!-- 错误数据表格 -->
+    <el-card>
+      <div slot="header">
+        <span>错误数据列表 - {{ sourceData.excelName }}</span>
+      </div>
+
+      <el-table
+        :data="tableData"
+        stripe
+        border
+        style="width: 100%">
+        <el-table-column
+          prop="sheetName"
+          label="表格名称"
+          min-width="280">
+        </el-table-column>
+        <el-table-column
+          prop="errorType"
+          label="错误类型"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          prop="cellCoordinates"
+          label="错误的单元格坐标"
+          min-width="300">
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 导出按钮 -->
+    <div class="export-section">
+      <el-button
+        type="primary"
+        size="large"
+        icon="el-icon-download"
+        :loading="exporting"
+        @click="exportToExcel">
+        {{ exporting ? '导出中...' : '导出 Excel' }}
+      </el-button>
+    </div>
+
+    <!-- 说明信息 -->
+    <div class="info-box">
+      <h4>功能说明</h4>
+      <ul>
+        <li>Excel 文件名称：{{ sourceData.excelName }}.xlsx</li>
+        <li>导出列：表格名称、错误类型、错误的单元格坐标</li>
+        <li>单元格坐标以中文逗号「，」分隔</li>
+        <li>使用 SheetJS (xlsx) 库实现纯前端导出</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 引入 Vue.js -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+  <!-- 引入 Element UI -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <!-- 引入 SheetJS (xlsx) -->
+  <script
+    src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- 引入应用脚本 -->
+  <script src="app.js"></script>
+</body>
+
+</html>
