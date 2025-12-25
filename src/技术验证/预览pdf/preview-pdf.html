@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0" />
+  <title>vue@2 element-ui demo</title>
+
+  <!-- import element-ui css -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+
+  <!-- import vue@2 -->
+  <script src="https://unpkg.com/vue@2"></script>
+  <!-- import element-ui component library -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+  <style></style>
+</head>
+
+<body>
+  <div id="app">
+    <el-button @click="handleClick1">window open 方式</el-button>
+    <el-button @click="handleClick2">post download 表单提交方式</el-button>
+    <el-button @click="handleClick3">get download 表单提交方式</el-button>
+    <el-button @click="handleClick4">军军 post download
+      表单提交方式</el-button>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+      },
+      methods: {
+        handleClick1() {
+          // 方式1：使用 GET 方式直接在新标签页打开（推荐 - 浏览器内预览）
+          window.open('http://192.168.234/pdf/preview/moer.pdf', '_blank')
+        },
+        handleClick2() {
+          // 方式2：使用 POST表单提交 预览 PDF（在浏览器内打开，支持 token 等参数）
+          const url = 'http://192.168.234/pdf/preview/moer.pdf'
+          const params = {}
+          this.postDownload(url, params)
+        },
+        handleClick3() {
+          // 方式3：使用 GET表单提交 预览 PDF（在浏览器内打开，支持 token 等参数）
+          const url = 'http://192.168.234/pdf/preview/moer.pdf'
+          const params = {}
+          this.getDownload(url, params)
+        },
+        handleClick4() {
+          // 方式3：使用 GET表单提交 预览 PDF（在浏览器内打开，支持 token 等参数）
+          const url = 'http://192.168.0.186:8587/api/user/rep/view/downloadAnnualReportFile'
+          const params = {
+            "parentEncode": "001008",
+            "sources": "上交所股票",
+            "typeCodeTj": "0",
+            "announcementDate": 1679673600000,
+            "companyName": "兖矿能源集团股份有限公司",
+            "typeName": "社会责任报告",
+            "sameAnnouncementLevel": 1,
+            "title": "兖矿能源：兖矿能源集团股份有限公司2022年度环境、社会及管治报告",
+            "announOrigLink": "http://static.sse.com.cn/disclosure/listedinfo/announcement/c/new/2023-03-25/600188_20230325_DXSW.pdf",
+            "typeCode": "001008034",
+            "reportYear": "2022",
+            "companyId": "005cb32ad87dcbd3288c27cfd0e17aa0",
+            "levelNum": 3,
+            "dataId": "3655153001",
+            "esgCode": 1,
+            "announcementYear": 2023,
+            "yearInfo": "2022",
+            "fileUrl": "/files/公告PDF/shanghai/2023-03-25/AM/600188_兖矿能源：兖矿能源集团股份有限公司2022年度环境、社会及管治报告_600188_20230325_DXSW.pdf",
+            "titleTj": "兖矿能源集团股份有限公司2022年度环境、社会及管治报告",
+            "hkstockSimplifiedTitle": "",
+            "rn": 1,
+            "slaveIdentifier": 3655153001,
+            "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlc19zdXBlcmFkbWluIiwicGFzc3dvcmQiOiJlMTBhZGMzOTQ5YmE1OWFiYmU1NmUwNTdmMjBmODgzZSIsImlkIjoiU1VQRVJNQU4wMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAiLCJ0b2tlbkZyb20iOiIyIiwidXNlck5hbWUiOiJlc19zdXBlcmFkbWluIiwiaWF0IjoxNzY2NjUxMTMzLCJqdGkiOiJlMTU4YTYxYmFiZjM0OWExYjEyZGY0MWQ0OTEyZTI0YSJ9.lIRZiSRhNf-sfXH3HBkiSncVLrAPGbIvILU2Wye89W0"
+          }
+          this.postDownload(url, params)
+        },
+        getDownload(url, params) {
+          const form = document.createElement('form')
+          form.style.display = 'none'
+          form.target = '_blank'
+          form.method = 'get'
+          form.action = url
+          Object.keys(params).forEach((key) => {
+            if (params[key]) {
+              const input = document.createElement('input')
+              input.type = 'hidden'
+              input.name = key
+              input.value = params[key]
+              form.appendChild(input)
+            }
+          })
+          document.body.appendChild(form)
+          form.submit()
+          document.body.removeChild(form)
+        },
+        postDownload(url, params) {
+          const form = document.createElement('form')
+          form.style.display = 'none'
+          form.target = '_blank'
+          form.method = 'post'
+          form.action = url
+          Object.keys(params).forEach((key) => {
+            if (params[key]) {
+              const input = document.createElement('input')
+              input.type = 'hidden'
+              input.name = key
+              input.value = params[key]
+              form.appendChild(input)
+            }
+          })
+          document.body.appendChild(form)
+          form.submit()
+          document.body.removeChild(form)
+        }
+      },
+    })
+    // Nginx 配置示例：
+    // # PDF 文件预览接口（GET / POST方式 - 浏览器内预览）
+    // location / pdf / preview / moer.pdf {
+    //   alias "/Users/mac/Downloads/摩尔线程：摩尔线程首次公开发行股票并在科创板上市招股说明书.pdf";
+    //   # 设置正确的 MIME 类型
+    //   add_header Content - Type application / pdf;
+    //   # 允许浏览器直接预览而不是下载
+    //   add_header Content-Disposition 'inline; filename="摩尔线程.pdf"';
+    //   # 禁用缓存，确保获取最新版本
+    //   add_header Cache - Control "no-store, no-cache, must-revalidate";
+    //   add_header Pragma "no-cache";
+    //   add_header Expires "0";
+    //   # 支持 POST 方法（将 405 错误转为 200 响应）
+    //   error_page 405 = 200 $uri
+    // }
+  </script>
+</body>
+
+</html>
